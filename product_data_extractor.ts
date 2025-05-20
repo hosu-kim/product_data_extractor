@@ -17,6 +17,8 @@ interface ApiResponseData
 	products: Product[];
 }
 
+url: string = "https://api.ecommerce.com/products";
+
 async function fetchData(url: string): Promise<ApiResponseData>
 {
 	try
@@ -39,3 +41,9 @@ async function fetchData(url: string): Promise<ApiResponseData>
 	}
 }
 
+function main
+{
+
+}
+
+main();
