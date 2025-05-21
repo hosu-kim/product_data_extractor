@@ -10,7 +10,7 @@ const BASE_API_URL: string = 'https://api.ecommerce.com/products';
 const INITIAL_MIN_PRICE: number = 0;
 const INITIAL_MAX_PRICE: number = 100000;
 const MAX_PRODUCTS_PER_CALL: number = 1000;
-let total_api_calls: number = 0;
+let totalApiCalls: number = 0;
 
 // The structure of the array for product data
 interface Product
@@ -41,7 +41,7 @@ async function fetchDataByPriceRange(minPrice: number, maxPrice: number): Promis
 	try
 	{
 		const response = await fetch(url);
-		total_api_calls++;
+		totalApiCalls++;
 
 
 		// status code: 200-299(true), 4xx or 5xx(false)
@@ -144,7 +144,7 @@ async function main()
 		}
 		else if (numOfTotalProducts > MAX_PRODUCTS_PER_CALL)
 			products = await getProductDataRecursively(INITIAL_MIN_PRICE, INITIAL_MAX_PRICE, initialResponseData);
-		console.log(`Total API calls: ${ total_api_calls }, Total number of products fetched ${ products.length }`);
+		console.log(`Total API calls: ${ totalApiCalls }, Total number of products fetched ${ products.length }`);
 	}
 	catch (error)
 	{
