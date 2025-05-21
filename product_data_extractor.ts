@@ -1,21 +1,24 @@
 /*
 file: product_data_extractor.ts
-description: Calls the API as few times as possible to store the results of API calls with optimized logic.
-author: Hosu Kim with ♥️ to Apify
+description: Calls the API as few times as possible 
+			 to fetch all the product data results with optimized logic.
+author: hosu-kim
 created: 2025-05-19 21:06:21 UTC
 */
 
 const BASE_API_URL: string = 'https://api.ecommerce.com/products';
 const INITIAL_MIN_PRICE: number = 0;
 const INITIAL_MAX_PRICE: number = 100000;
-const MAX_NUM_OF_PRODUCTS_PER_CALL = 1000;
-let TOTAL_API_CALLS = 0;
+const MAX_PRODUCTS_PER_CALL: number = 1000;
+let total_api_calls: number = 0;
 
+// The structure of the array for product data
 interface Product
 {
 	[key: string]: any;
 }
 
+// The structure of the object from the API response
 interface ApiResponseData
 {
 	total: number;
@@ -23,6 +26,14 @@ interface ApiResponseData
 	products: Product[];
 }
 
+/**
+ * Fetches the API response with the query parameters, minPrice and maxPrice.
+ * 
+ * @param minPrice - The minimum price of products to fetch from.
+ * @param maxPrice - The maximum price of products to fetch to.
+ * @returns {Promise<ApiResponseData>} API response data
+ * @throw Error if HTTP response error
+ */
 async function fetchDataByPriceRange(minPrice: number, maxPrice: number): Promise<ApiResponseData>
 {
 	const url: string = `${ BASE_API_URL }?minPrice=${ minPrice }&maxPrice=${ maxPrice }`;
@@ -30,15 +41,15 @@ async function fetchDataByPriceRange(minPrice: number, maxPrice: number): Promis
 	try
 	{
 		const response = await fetch(url);
-		TOTAL_API_CALLS++;
+		total_api_calls++;
 
+
+		// status code: 200-299(true), 4xx or 5xx(false)
 		if (!response.ok)
-		{
-			throw new Error(`HTTP error. status: ${ response.status }`);
-		}
+			throw new Error(`HTTP error status: ${ response.status }`);
 
-		const data: ApiResponseData = await response.json();
-		return data;
+		const responseData: ApiResponseData = await response.json();
+		return responseData;
 	}
 	catch (error)
 	{
@@ -48,16 +59,36 @@ async function fetchDataByPriceRange(minPrice: number, maxPrice: number): Promis
 }
 
 /* ============================== CORE LOGIC FUNCTION ============================== */
+/**
+ * Recursively fetches product data. This function is called when a signle API request 
+ * for a given pricd range does not return all products within that range.
+ * and the range can be further sub-divided.
+ * 
+ * The logic is to divided the current price range by its midpoint and make two recursive 
+ * calls for the lower and upper sub-ranges.
+ * 
+ * Base cases for Recursion:
+ * 1. All products for the current range are fetched in one API call (count === total).
+ * 2. The price range cannot be split further (minPrice === maxPrice). In this case,
+ * 	  it returns whatever products were fetched for that sigle price point. This handles
+ * 	  the known limitation where items at a single price might exceed MAX_PRODUCTS_PER_CALL.
+ * 
+ * @param minPrice - The minimum price of products to fetch from.
+ * @param maxPrice - The maximum price of products to fetch to.
+ * @param initialFetchedData - optional: Use initial fetched data once at the beginning
+ * 										 to avoid duplicate API calls with the same parameters
+ * @returns {Promise<Product[]>} Products data in an array: [{}, {}, {}, ...]
+ */
 async function getProductDataRecursively(
 	minPrice: number,
 	maxPrice: number,
 	initialFetchedData?: ApiResponseData
 ): Promise<Product[]>
 {	
-	// Pamameter validation check
+	// Parameter validation check
 	if (minPrice > maxPrice)
 	{
-		console.log("Wrong price range provided.");
+		console.error("Error: minPrice cannot be greater than maxPrice.");
 		return []
 	}
 
@@ -66,16 +97,18 @@ async function getProductDataRecursively(
 
 	if (currentRangeData.count === currentRangeData.total)
 	{
-		console.log(`In Range ${ minPrice } - ${ maxPrice }, all ${ currentRangeData } fetched.`)
+		console.log(`In Range ${ minPrice } - ${ maxPrice }, all ${ currentRangeData.count } fetched.`);
 		return currentRangeData.products;
 	}
 	else if (minPrice === maxPrice)
 	{
-		console.warn("Price range cannot be split. Returns current product data fetched.");
+		console.warn(`Price range cannot be split. Only returns fetched ${ currentRangeData.count } products data.`);
 		return currentRangeData.products;
 	}
 	else
 	{
+		// (minPrice + maxPrice) / 2 for midPrice: X
+		// This form is safer against overflow especially with larger integers.
 		const midPrice = Math.floor(minPrice + (maxPrice - minPrice) / 2);
 
 		const [lowerPriceRange, upperPriceRange] = await Promise.all([
@@ -90,37 +123,32 @@ async function main()
 {
 	try
 	{
-		let productData: Product[] = []; // Stores products data from API calls here.
+		let products: Product[] = []; // Here stores products data from API responses.
 
-		// Gets initial data to get the number of all products in the API data.
-		const initialProductData: ApiResponseData = await fetchDataByPriceRange(INITIAL_MIN_PRICE, INITIAL_MAX_PRICE);
-		const numOfAllProducts = initialProductData.total;
+		// Fetches initial data to get the number of all products in the API data.
+		const initialResponseData: ApiResponseData = await fetchDataByPriceRange(INITIAL_MIN_PRICE, INITIAL_MAX_PRICE);
+		const numOfTotalProducts: number = initialResponseData.total;
 
-		/* Three conditional branches:
+		/* Here three conditional branches:
 		1. No product data to store
 		2. The number of the products are 1000 or less: Store the data with only one API call.
-		3. The number of the products are more than 1000: Core logic starts
+		3. The number of the products are more than 1000: Core recursion logic starts
 		*/
-		if (numOfAllProducts <= 0)
-		{
+		if (numOfTotalProducts === 0)
 			console.log("Fetching completed: No product found.");
-		}
-		else if (numOfAllProducts <= MAX_NUM_OF_PRODUCTS_PER_CALL)
+		// Branch 2: 
+		else if (numOfTotalProducts <= MAX_PRODUCTS_PER_CALL)
 		{
-			productData = initialProductData.products;
-			console.log(`Fetching completed: ${ numOfAllProducts } are fetched in the API call.`);
+			products = initialResponseData.products;
+			console.log(`Fetching completed: ${ numOfTotalProducts } products fetched from the API response`);
 		}
-		else if (numOfAllProducts > MAX_NUM_OF_PRODUCTS_PER_CALL)
-		{
-			console.log(`Total number of Products:${ numOfAllProducts }`);
-			productData = await getProductDataRecursively(INITIAL_MIN_PRICE, INITIAL_MAX_PRICE, initialProductData);
-
-		}
-		console.log(`Total API calls: ${ TOTAL_API_CALLS }, Total products fetched ${ productData.length }`);
+		else if (numOfTotalProducts > MAX_PRODUCTS_PER_CALL)
+			products = await getProductDataRecursively(INITIAL_MIN_PRICE, INITIAL_MAX_PRICE, initialResponseData);
+		console.log(`Total API calls: ${ total_api_calls }, Total number of products fetched ${ products.length }`);
 	}
 	catch (error)
 	{
-		console.error("Failed to get the total number of products: ", error);
+		console.error("Error occured: ", error);
 	}
 }
 
