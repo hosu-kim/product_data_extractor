@@ -72,4 +72,4 @@ This script provides a robust solution to the problem of fetching a large datase
 * **hosu-kim**
 
 ## License
-This project is licensed uner the MIT License. See the [LICENSE.md](LICENSE.md)
+This project is licensed uner the MIT License. See the [LICENSE.md](LICENSE)
