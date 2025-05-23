@@ -53,7 +53,7 @@ async function fetchDataByPriceRange(minPrice: number, maxPrice: number): Promis
 	}
 	catch (error)
 	{
-		console.error("Error occured during the API call: ", error);
+		console.error(`Error occured during the API call: ${ error }`);
 		throw error;
 	}
 }
