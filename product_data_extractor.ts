@@ -6,6 +6,13 @@ author: hosu-kim
 created: 2025-05-19 21:06:21 UTC
 */
 
+/*
+My coding principles:
+1. Self-documenting code === Team play lover 🤝
+2. Comments are my life - Who cooked this spaghetti? 🍝 author: hosu-kim
+3. let typing: bug traps; 🪲
+*/
+
 const BASE_API_URL: string = 'https://api.ecommerce.com/products';
 const INITIAL_MIN_PRICE: number = 0;
 const INITIAL_MAX_PRICE: number = 100000;
