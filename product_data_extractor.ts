@@ -98,8 +98,8 @@ async function getProductDataRecursively(
 		return []
 	}
 
-	const currentRangeData = initialFetchedData ?
-							 initialFetchedData : await fetchDataByPriceRange(minPrice, maxPrice);
+	const currentRangeData: ApiResponseData =
+	initialFetchedData ? initialFetchedData : await fetchDataByPriceRange(minPrice, maxPrice);
 
 	if (currentRangeData.count === currentRangeData.total)
 	{
@@ -115,14 +115,14 @@ async function getProductDataRecursively(
 	{
 		// (minPrice + maxPrice) / 2 for midPrice: X
 		// This form is safer against overflow especially with larger integers.
-		const midPrice = Math.floor(minPrice + (maxPrice - minPrice) / 2);
+		const midPrice: number = Math.floor(minPrice + (maxPrice - minPrice) / 2);
 
-		const [lowerPriceRange, upperPriceRange] = await Promise.all([
+		const [lowerPriceRange, upperPriceRange]: [Product[], Product[]] = await Promise.all([
 			getProductDataRecursively(minPrice, midPrice),
 			getProductDataRecursively(midPrice + 1, maxPrice)
 		]);
 		return [...lowerPriceRange, ...upperPriceRange];
-	}
+	} 
 }
 
 async function main()
