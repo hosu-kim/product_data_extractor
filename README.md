@@ -43,7 +43,7 @@ The script implements a divide-and-conquer strategy using recursion:
 * **Products at a Single Price Point Exceeding Limit**: If the number of products at a single, indivisible price point (i.e., `minPrice === maxPrice`) exceeds `MAX_PRODUCTS_PER_CALL`, the script can only fetch up to `MAX_PRODUCTS_PER_CALL` items for that specific price. This is a known limitation if the API doesn't offer additional pagination mechanisms (e.g., `offset` or `page` parameters) for a fixed price.
 
 ## Author
-* **hosu-kim**
+**hosu-kim**
 
 ## License
 
