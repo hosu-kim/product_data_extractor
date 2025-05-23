@@ -40,9 +40,8 @@ async function fetchDataByPriceRange(minPrice: number, maxPrice: number): Promis
 
 	try
 	{
-		const response = await fetch(url);
+		const response: Response = await fetch(url);
 		totalApiCalls++;
-
 
 		// status code: 200-299(true), 4xx or 5xx(false)
 		if (!response.ok)
