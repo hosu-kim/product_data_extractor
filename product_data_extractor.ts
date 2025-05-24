@@ -142,7 +142,6 @@ async function main()
 		*/
 		if (numOfTotalProducts === 0)
 			console.log("Fetching completed: No product found.");
-		// Branch 2: 
 		else if (numOfTotalProducts <= MAX_PRODUCTS_PER_CALL)
 		{
 			products = initialResponseData.products;
@@ -150,11 +149,11 @@ async function main()
 		}
 		else if (numOfTotalProducts > MAX_PRODUCTS_PER_CALL)
 			products = await getProductDataRecursively(INITIAL_MIN_PRICE, INITIAL_MAX_PRICE, initialResponseData);
-		console.log(`Total API calls: ${ totalApiCalls }, Total number of products fetched ${ products.length }`);
+		console.log(`Total API calls: ${ totalApiCalls }, Total number of fetched products: ${ products.length }`);
 	}
 	catch (error)
 	{
-		console.error("Error occured: ", error);
+		console.error(`Error occured: ${ error }`);
 	}
 }
 
