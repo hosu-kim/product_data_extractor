@@ -145,11 +145,11 @@ async function main()
 		else if (numOfTotalProducts <= MAX_PRODUCTS_PER_CALL)
 		{
 			products = initialResponseData.products;
-			console.log(`Fetching completed.`);
+			console.log(`Fetching completed. Fetched ${ initialResponseData.count } products.`);
 		}
 		else if (numOfTotalProducts > MAX_PRODUCTS_PER_CALL)
 			products = await getProductDataRecursively(INITIAL_MIN_PRICE, INITIAL_MAX_PRICE, initialResponseData);
-		console.log(`Total API calls: ${ totalApiCalls }, Total number of fetched products: ${ products.length }`);
+		console.log(`Summary - Total API calls: ${ totalApiCalls }, Total fetched products: ${ products.length }`);
 	}
 	catch (error)
 	{
