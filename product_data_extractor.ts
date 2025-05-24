@@ -95,7 +95,7 @@ async function getProductDataRecursively(
 	if (minPrice > maxPrice)
 	{
 		console.error("Error: minPrice cannot be greater than maxPrice.");
-		return []
+		return [];
 	}
 
 	const currentRangeData: ApiResponseData =
