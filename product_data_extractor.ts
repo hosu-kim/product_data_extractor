@@ -145,7 +145,7 @@ async function main()
 		else if (numOfTotalProducts <= MAX_PRODUCTS_PER_CALL)
 		{
 			products = initialResponseData.products;
-			console.log(`Fetching completed: ${ numOfTotalProducts } products fetched from the API response`);
+			console.log(`Fetching completed.`);
 		}
 		else if (numOfTotalProducts > MAX_PRODUCTS_PER_CALL)
 			products = await getProductDataRecursively(INITIAL_MIN_PRICE, INITIAL_MAX_PRICE, initialResponseData);
