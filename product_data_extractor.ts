@@ -51,14 +51,13 @@ async function fetchResponseByPriceRange(minPrice: number, maxPrice: number): Pr
 
 		// status code: 200-299(true), 4xx or 5xx(false)
 		if (!response.ok)
-			throw new Error(`HTTP error status - ${ response.status }`);
+			throw new Error(`HTTP ${ response.status } (${response.statusText}) from ${ url }`);
 
 		const responseData: ApiResponseData = await response.json();
 		return responseData;
 	}
 	catch (error)
 	{
-		console.error(`Error occured during the API call: ${ error }`);
 		throw error;
 	}
 }
