@@ -156,4 +156,5 @@ async function main()
 		console.error(`Error occured: ${ error }`);
 	}
 }
+
 main();
