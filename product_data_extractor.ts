@@ -41,7 +41,7 @@ interface ApiResponseData
  * @returns {Promise<ApiResponseData>} API response data
  * @throw Error if HTTP response error
  */
-async function fetchDataByPriceRange(minPrice: number, maxPrice: number): Promise<ApiResponseData>
+async function fetchResponseByPriceRange(minPrice: number, maxPrice: number): Promise<ApiResponseData>
 {
 	const url: string = `${ BASE_API_URL }?minPrice=${ minPrice }&maxPrice=${ maxPrice }`;
 
@@ -52,7 +52,7 @@ async function fetchDataByPriceRange(minPrice: number, maxPrice: number): Promis
 
 		// status code: 200-299(true), 4xx or 5xx(false)
 		if (!response.ok)
-			throw new Error(`HTTP error status: ${ response.status }`);
+			throw new Error(`HTTP error status - ${ response.status }`);
 
 		const responseData: ApiResponseData = await response.json();
 		return responseData;
@@ -85,7 +85,7 @@ async function fetchDataByPriceRange(minPrice: number, maxPrice: number): Promis
  * 										 to avoid duplicate API calls with the same parameters
  * @returns {Promise<Product[]>} Products data in an array: [{}, {}, {}, ...]
  */
-async function getProductDataRecursively(
+async function extractProductDataRecursively(
 	minPrice: number,
 	maxPrice: number,
 	initialFetchedData?: ApiResponseData
@@ -99,11 +99,11 @@ async function getProductDataRecursively(
 	}
 
 	const currentRangeData: ApiResponseData =
-	initialFetchedData ? initialFetchedData : await fetchDataByPriceRange(minPrice, maxPrice);
+	initialFetchedData ? initialFetchedData : await fetchResponseByPriceRange(minPrice, maxPrice);
 
 	if (currentRangeData.count === currentRangeData.total)
 	{
-		console.log(`In Range ${ minPrice } - ${ maxPrice }, all ${ currentRangeData.count } fetched.`);
+		console.log(`In The range (${ minPrice } - ${ maxPrice }), all ${ currentRangeData.count } fetched.`);
 		return currentRangeData.products;
 	}
 	else if (minPrice === maxPrice)
@@ -118,8 +118,8 @@ async function getProductDataRecursively(
 		const midPrice: number = Math.floor(minPrice + (maxPrice - minPrice) / 2);
 
 		const [lowerPriceRange, upperPriceRange]: [Product[], Product[]] = await Promise.all([
-			getProductDataRecursively(minPrice, midPrice),
-			getProductDataRecursively(midPrice + 1, maxPrice)
+			extractProductDataRecursively(minPrice, midPrice),
+			extractProductDataRecursively(midPrice + 1, maxPrice)
 		]);
 		return [...lowerPriceRange, ...upperPriceRange];
 	} 
@@ -132,7 +132,7 @@ async function main()
 		let products: Product[] = []; // Here stores products data from API responses.
 
 		// Fetches initial data to get the number of all products in the API data.
-		const initialResponseData: ApiResponseData = await fetchDataByPriceRange(INITIAL_MIN_PRICE, INITIAL_MAX_PRICE);
+		const initialResponseData: ApiResponseData = await fetchResponseByPriceRange(INITIAL_MIN_PRICE, INITIAL_MAX_PRICE);
 		const numOfTotalProducts: number = initialResponseData.total;
 
 		/* Here three conditional branches:
@@ -148,13 +148,12 @@ async function main()
 			console.log(`Fetching completed. Fetched ${ initialResponseData.count } products.`);
 		}
 		else if (numOfTotalProducts > MAX_PRODUCTS_PER_CALL)
-			products = await getProductDataRecursively(INITIAL_MIN_PRICE, INITIAL_MAX_PRICE, initialResponseData);
-		console.log(`Summary - Total API calls: ${ totalApiCalls }, Total fetched products: ${ products.length }`);
+			products = await extractProductDataRecursively(INITIAL_MIN_PRICE, INITIAL_MAX_PRICE, initialResponseData);
+		console.log(`Summary - Total API calls: ${ totalApiCalls }, Total extracted products: ${ products.length }`);
 	}
 	catch (error)
 	{
 		console.error(`Error occured: ${ error }`);
 	}
 }
-
 main();
