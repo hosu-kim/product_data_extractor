@@ -25,7 +25,7 @@ interface Product
 	[key: string]: any;
 }
 
-// The structure of the object from the API response
+// The structure of the object to store the API response data
 interface ApiResponseData
 {
 	total: number;
@@ -43,10 +43,9 @@ interface ApiResponseData
  */
 async function fetchResponseByPriceRange(minPrice: number, maxPrice: number): Promise<ApiResponseData>
 {
-	const url: string = `${ BASE_API_URL }?minPrice=${ minPrice }&maxPrice=${ maxPrice }`;
-
 	try
 	{
+		const url: string = `${ BASE_API_URL }?minPrice=${ minPrice }&maxPrice=${ maxPrice }`;
 		const response: Response = await fetch(url);
 		totalApiCalls++;
 
@@ -103,12 +102,12 @@ async function extractProductDataRecursively(
 
 	if (currentRangeData.count === currentRangeData.total)
 	{
-		console.log(`In The range (${ minPrice } - ${ maxPrice }), all ${ currentRangeData.count } fetched.`);
+		console.log(`In the range (${ minPrice } - ${ maxPrice }), extracted ${ currentRangeData.count } products.`);
 		return currentRangeData.products;
 	}
 	else if (minPrice === maxPrice)
 	{
-		console.warn(`Price range cannot be split. Only returns fetched ${ currentRangeData.count } products data.`);
+		console.warn(`Price range cannot be split. Only extract fetched ${ currentRangeData.count } products.`);
 		return currentRangeData.products;
 	}
 	else
@@ -145,7 +144,7 @@ async function main()
 		else if (numOfTotalProducts <= MAX_PRODUCTS_PER_CALL)
 		{
 			products = initialResponseData.products;
-			console.log(`Fetching completed. Fetched ${ initialResponseData.count } products.`);
+			console.log(`Fetching completed. Fetched ${ products.length } products.`);
 		}
 		else if (numOfTotalProducts > MAX_PRODUCTS_PER_CALL)
 			products = await extractProductDataRecursively(INITIAL_MIN_PRICE, INITIAL_MAX_PRICE, initialResponseData);
