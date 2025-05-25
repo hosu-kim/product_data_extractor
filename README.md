@@ -1,4 +1,4 @@
-# Product Data Extractor From API
+# Product Data Extractor By Price Range From API
 
 ## Project Summary
 
