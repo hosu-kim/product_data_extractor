@@ -92,8 +92,7 @@ async function extractProductDataRecursively(
 	// Parameter validation check
 	if (minPrice > maxPrice)
 	{
-		console.error("Error: minPrice cannot be greater than maxPrice.");
-		return [];
+		throw new Error('minPrice cannot be greater than maxPrice.');
 	}
 
 	const currentRangeData: ApiResponseData =
